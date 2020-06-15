@@ -1,0 +1,12 @@
+{
+  "name": "simple_node",
+  "version": "1.0.0",
+  "description": "Node.js on Docker",
+  "main": "express.js",
+  "scripts": {
+    "start": "node express.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1"
+  }
+}
