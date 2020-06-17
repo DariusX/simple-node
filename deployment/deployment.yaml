@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-node
+  labels:
+    app: simple-node
+    app.kubernetes.io/instance: simple-node
+    app.kubernetes.io/name: simple-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-node
+  template:
+    metadata:
+      labels:
+        app: simple-node
+        app.kubernetes.io/name: simple-node
+        app.kubernetes.io/instance: simple-node
+    spec:
+      containers:
+        - name: simple-node
+          image: dariuscooper/simple-node:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+

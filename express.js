@@ -19,10 +19,10 @@ app.delete('/del_user', function (req, res) {
    res.send('Hello DELETE');
 })
 
-// This responds a GET request for the /list_user page.
-app.get('/list_user', function (req, res) {
-   console.log("Got a GET request for /list_user");
-   res.send('Page Listing');
+// This responds a GET request for the /confirm page.
+app.get('/confirm', function (req, res) {
+   console.log("Got a GET request for /confirm");
+   res.send('Confirm received');
 })
 
 // This responds a GET request for abcd, abxcd, ab123cd, and so on

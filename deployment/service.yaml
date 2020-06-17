@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-node
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8081
+      protocol: TCP
+
+  selector:
+    app.kubernetes.io/name: simple-node
+    app.kubernetes.io/instance: simple-node
