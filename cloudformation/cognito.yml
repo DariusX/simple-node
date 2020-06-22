@@ -1,0 +1,131 @@
+Description: AWS Cognito User Pool
+
+Parameters:
+
+    UserPoolName:
+        Description: Name of the Project
+        Type: String
+
+    GroupName:
+        Description: Group name in which user will be added
+        Type: String
+
+Resources:
+
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Description: "A Cognito user pool for authenticating users"
+    Properties:
+      UserPoolName: !Sub ${UserPoolName}
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          TemporaryPasswordValidityDays: 7
+
+      UsernameAttributes:
+        - email
+        
+      UserPoolTags: 
+        UserPoolName: !Sub ${UserPoolName}
+
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          StringAttributeConstraints:
+            MaxLength: '2048'
+            MinLength: '1'
+          Mutable: true
+          Required: true
+        
+        - Name: description
+          AttributeDataType: String
+          StringAttributeConstraints:
+            MaxLength: '2048'
+            MinLength: '1'
+          Mutable: true
+          Required: false
+        
+        - Name: usertype
+          AttributeDataType: String
+          StringAttributeConstraints:
+            MaxLength: '2048'
+            MinLength: '1'
+          Mutable: true
+          Required: false
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Description: "app client pool"
+    Properties:
+      ClientName: !Sub ${UserPoolName}-Client
+      GenerateSecret: false
+      UserPoolId: !Ref UserPool
+      ExplicitAuthFlows:
+      - ALLOW_ADMIN_USER_PASSWORD_AUTH
+      - ALLOW_CUSTOM_AUTH
+      - ALLOW_REFRESH_TOKEN_AUTH
+      - ALLOW_USER_PASSWORD_AUTH
+      - ALLOW_USER_SRP_AUTH
+
+  UserPoolAdmin:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Admin
+      UserPoolId: !Ref UserPool
+
+  UserPoolGuest:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: User
+      UserPoolId: !Ref UserPool
+
+ 
+  # Create an IAM user with Access Keys to enable automated deployment of the website to this bucket
+  PublishUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      Tags: 
+        - Key: UserPoolName
+          Value: !Ref UserPoolName
+      Policies:
+        - PolicyName: !Sub ${UserPoolName}-Pool-Policy
+          PolicyDocument:
+            Statement:
+            - Action:
+              - cognito-identity:*
+              - cognito-idp:*
+              - cognito-sync:*
+              - iam:ListRoles
+              - iam:ListOpenIdConnectProviders
+              Effect: Allow
+              Resource:
+              - !GetAtt UserPool.Arn
+
+  PublishCredentials:
+    Type: 'AWS::IAM::AccessKey'
+    Properties:
+      UserName: !Ref PublishUser
+
+
+Outputs:
+
+  CognitoAccessKeyId:
+    Description: 'S3 Access Key'
+    Value: !Ref PublishCredentials
+
+  CognitoAccessKeySecret:
+    Description: 'S3 Secret Key'
+    Value: !GetAtt PublishCredentials.SecretAccessKey
+
+  CognitoUserPoolId:
+    Description: The Pool ID of the Cognito User Pool
+    Value: !Ref UserPool
+
+  CognitoUserPoolClientId:
+    Description: The Client ID for AWS AppSync Auth
+    Value: !Ref UserPoolClient
+
+  CognitoUserPoolArn:
+    Description: The Arn for created userpool
+    Value: !GetAtt UserPool.Arn

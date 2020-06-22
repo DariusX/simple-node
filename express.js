@@ -1,4 +1,7 @@
+var fs = require('fs')
 var express = require('express');
+var http = require('http')
+var https = require('https')
 var app = express();
 
 // This responds with "Hello World" on the homepage
@@ -41,9 +44,10 @@ app.get('/process_get', function (req, res) {
    res.end(JSON.stringify(response));
 })
 
-var server = app.listen(8081, function () {
-   var host = server.address().address
-   var port = server.address().port
-   
-   console.log("Example app listening at http://%s:%s", host, port)
-})
+server_options = {
+   key  : fs.readFileSync('certs/key.pem'),
+   cert : fs.readFileSync('certs/cert.pem')
+ }
+
+http.createServer(app).listen(80, function () {  console.log("App listening on 80");});
+https.createServer(server_options, app).listen(443, function () {  console.log("App listening on 443");});
